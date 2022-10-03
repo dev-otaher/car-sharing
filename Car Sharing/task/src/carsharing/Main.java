@@ -43,40 +43,92 @@ public class Main {
                             "\n0. Back"
             );
             choice = Integer.parseInt(scanner.nextLine());
+            System.out.println();
             switch (choice) {
                 case 1:
-                    printCompanies();
+                    openCompanyList();
                     break;
                 case 2:
                     createCompany();
                     break;
                 case 0:
                 default:
-                    System.out.println();
                     break;
             }
         } while (choice > 0);
     }
 
-    public static void printCompanies() {
-        List<Company> companies = companyDao.getCompanies();
-        System.out.println();
-        if (companies.isEmpty()) {
-            System.out.println("The company list is empty!");
-        } else {
-            System.out.println("Company list:");
-            int i = 1;
-            for (Company company : companyDao.getCompanies()) {
-                System.out.printf("%d. %s\n", i++, company.getName());
-            }
-        }
-        System.out.println();
+    private static void createCompany() {
+        System.out.println("Enter the company name:");
+        String name = new Scanner(System.in).nextLine();
+        companyDao.createCompany(new Company(name));
+        System.out.println("The company was created!\n");
     }
 
-    private static void createCompany() {
-        System.out.println("\nEnter the company name:");
-        String name = new Scanner(System.in).nextLine();
-        companyDao.insertCompany(new Company(name));
-        System.out.println("The company was created!\n");
+    public static void openCompanyList() {
+        int companyIndex = chooseCompany();
+        if (companyIndex < 1) {
+            return;
+        }
+        Company company = companyDao.getCompanies().get(companyIndex - 1);
+        int choice;
+        System.out.printf("'%s' company\n", company.getName());
+        do {
+            System.out.println(
+                    "1. Car list\n" +
+                            "2. Create a car\n" +
+                            "0. Back"
+            );
+            choice = Integer.parseInt(scanner.nextLine());
+            System.out.println();
+            switch (choice) {
+                case 1:
+                    openCarList(company);
+                    break;
+                case 2:
+                    createCar(company);
+                    break;
+                default:
+                    break;
+            }
+        } while (choice > 0);
+    }
+
+    private static int chooseCompany() {
+        List<Company> companies = companyDao.getCompanies();
+        if (companies.isEmpty()) {
+            System.out.println("The company list is empty!\n");
+            return -100;
+        }
+        System.out.println("Choose the company:");
+        printList(companies);
+        System.out.println("0. Back");
+        int companyIndex = Integer.parseInt(scanner.nextLine());
+        System.out.println();
+        return companyIndex;
+    }
+
+    private static void printList(List<?> list) {
+        int index = 1;
+        for (Object object : list) {
+            System.out.printf("%d. %s\n", index++, object.toString());
+        }
+    }
+
+    private static void createCar(Company company) {
+        System.out.println("Enter the car name:");
+        String name = scanner.nextLine();
+        companyDao.createCar(new Car(name, company));
+        System.out.println("The car was added!\n");
+    }
+
+    private static void openCarList(Company company) {
+        List<Car> cars = companyDao.getCarsByCompany(company);
+        if (cars.isEmpty()) {
+            System.out.println("The car list is empty!\n");
+        } else {
+            System.out.println("Car list:");
+            printList(cars);
+        }
     }
 }
